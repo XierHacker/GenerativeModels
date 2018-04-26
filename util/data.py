@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
+import sklearn.preprocessing as skprep
 import matplotlib.pyplot as plt
+
 
 
 def load_mnist(reshape=False):
@@ -25,8 +27,17 @@ def load_mnist(reshape=False):
         X_test = np.reshape(X_test, newshape=(-1, 28, 28))
         return X_train,y_train,X_test
 
+def standard(X_train,X_test):
+    X_train=X_train/256
+    X_test=X_test/256
+    return X_train,X_test
+
 
 if __name__=="__main__":
-    X_train, y_train, X_test=load_mnist(reshape=True)
-    plt.imshow(X_train[1])
+    X_train, y_train, X_test=load_mnist(reshape=False)
+    print(X_train[0])
+    X_train,X_test=standard(X_train=X_train,X_test=X_test)
+    print(X_train[0])
+    print(y_train[0])
+    plt.imshow(np.reshape(X_train[0],[28,28]))
     plt.show()
