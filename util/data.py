@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 def load_mnist(reshape=False):
     # generate data
-    train_frame = pd.read_csv("../data/MNIST/train.csv")
-    test_frame = pd.read_csv("../data/MNIST/test.csv")
+    train_frame = pd.read_csv("../../data/MNIST/train.csv")
+    test_frame = pd.read_csv("../../data/MNIST/test.csv")
 
     # pop the labels and one-hot coding
     train_labels_frame = train_frame.pop("label")
