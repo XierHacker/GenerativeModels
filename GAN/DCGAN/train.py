@@ -115,7 +115,25 @@ def train():
     with strategy.scope():
         def train_step(inputs):
             x,y=inputs
-            noise=tf.random.normal(shape=(BATCH_SIZE_PER_REPLICA,NOISE_DIM))
+            
+            k=5
+            #train generator
+            for i in range(k):
+                with tf.GradientTape() as g_tape:
+                    noise=tf.random.normal(shape=(BATCH_SIZE_PER_REPLICA,NOISE_DIM))
+                    #noise to images
+                    fake_images=G(noise,training=True)
+                    #juege by discriminator
+                    real_logits=D(x,training=True)
+                    fake_logits=D(fake_images,training=True)
+                    #compute gen loss
+                    gen_loss=g_loss(fake_logits)
+                    
+            #compute generatorgradients
+            g_gradients=g_tape.gradient(gen_loss,G.trainable_variables)
+            #apply gradients
+            G_optimizer.apply_gradients(zip(g_gradients,G.trainable_variables))
+           
             with tf.GradientTape() as g_tape,tf.GradientTape() as d_tape:
                 #noise to images
                 fake_images=G(noise,training=True)
