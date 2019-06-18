@@ -163,7 +163,7 @@ def train():
             epoch_disc_loss=epoch_disc_loss/num_batchs
 
             print("epoch_gen_loss:",epoch_gen_loss.numpy())
-            print("epoch_disc_loss:",epoch_gen_loss.numpy())
+            print("epoch_disc_loss:",epoch_disc_loss.numpy())
         
             #save model
             checkpoint.save(CHECK_POINTS_PATH)
