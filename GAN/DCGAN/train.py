@@ -140,26 +140,31 @@ def train():
     #distribute train_step use basic train step
     with strategy.scope():
         def dist_train_step(dataset_inputs):
-            replica_losses=strategy.experimental_run_v2(fn=train_step,args=(dataset_inputs,))
-            print("replica_losses:\n",replica_losses)
-            # return strategy.reduce(reduce_op=tf.distribute.ReduceOp.SUM,value=replica_losses,axis=None)
+            replica_gen_losses,replica_disc_losses=strategy.experimental_run_v2(
+                fn=train_step,
+                args=(dataset_inputs,)
+                )
+            #print("replica_losses:\n",replica_losses)
+            reduce_gen_loss=strategy.reduce(reduce_op=tf.distribute.ReduceOp.SUM,value=replica_gen_losses,axis=None)
+            reduce_disc_loss=strategy.reduce(reduce_op=tf.distribute.ReduceOp.SUM,value=replica_disc_losses,axis=None)
+            return reduce_gen_loss,reduce_disc_loss
 
         for epoch in range(EPOCHS):
             print("-----------EPOCH:",epoch)
-            #epoch_loss=0.0
+            epoch_gen_loss=0.0
+            epoch_disc_loss=0.0
             num_batchs=0
             for records in train_dist_dataset:
-                #epoch_loss+=dist_train_step(records)
-                dist_train_step(records)
+                reduce_gen_loss,reduce_disc_loss=dist_train_step(records)
+                epoch_gen_loss+=reduce_gen_loss
+                epoch_disc_loss+=reduce_disc_loss
                 num_batchs+=1
-            # epoch_loss=epoch_loss/num_batchs
+            epoch_gen_loss=epoch_gen_loss/num_batchs
+            epoch_disc_loss=epoch_disc_loss/num_batchs
 
-            # print("epoch_loss:",epoch_loss.numpy())
-            # print("epoch_accuracy:",train_accuracy.result().numpy())
-
-            #reset states
-            # train_accuracy.reset_states()
-
+            print("epoch_gen_loss:",epoch_gen_loss.numpy())
+            print("epoch_disc_loss:",epoch_gen_loss.numpy())
+        
             #save model
             checkpoint.save(CHECK_POINTS_PATH)
 
